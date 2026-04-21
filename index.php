@@ -16,10 +16,11 @@
 
 // Incluir configuración de la aplicación
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/app/helpers.php';
 
 // Determinar qué página/acción se solicita
-$pagina = $_GET['pagina'] ?? 'login';
-$accion = $_GET['accion'] ?? '';
+$pagina = preg_replace('/[^a-zA-Z0-9_]/', '', $_GET['pagina'] ?? 'login');
+$accion = preg_replace('/[^a-zA-Z0-9_]/', '', $_GET['accion'] ?? '');
 
 // Verificar si el usuario está logueado
 $logueado = isset($_SESSION['logueado']) && $_SESSION['logueado'];

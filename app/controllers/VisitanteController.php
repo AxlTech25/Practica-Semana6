@@ -17,6 +17,17 @@ class VisitanteController {
     }
     
     /**
+     * Verificar token CSRF en formularios
+     */
+    private function verificarCSRF($pagina = 'registro') {
+        if (!verificarTokenCSRF($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errores'] = ['Token de seguridad inválido. Vuelva a cargar la página.'];
+            header('Location: index.php?pagina=' . $pagina);
+            exit;
+        }
+    }
+
+    /**
      * Mostrar formulario de registro
      */
     public function mostrarRegistro() {
@@ -32,10 +43,13 @@ class VisitanteController {
             header('Location: index.php?pagina=registro');
             exit;
         }
+
+        $this->verificarCSRF('registro');
         
         // Validar datos
         $validacion = $this->validarRegistro($_POST);
         if (!$validacion['valido']) {
+            setOldInput($_POST);
             $_SESSION['errores'] = $validacion['errores'];
             header('Location: index.php?pagina=registro');
             exit;
@@ -59,9 +73,11 @@ class VisitanteController {
         $resultado = $this->visitanteModel->registrar($datos);
         
         if ($resultado['exito']) {
+            clearOldInput();
             $_SESSION['mensaje_exito'] = 'Visitante registrado exitosamente (ID: ' . $resultado['id'] . ')';
             header('Location: index.php?pagina=registro');
         } else {
+            setOldInput($_POST);
             $_SESSION['errores'] = [$resultado['mensaje']];
             header('Location: index.php?pagina=registro');
         }
@@ -91,6 +107,8 @@ class VisitanteController {
         $resultados = [];
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->verificarCSRF('busqueda');
+
             $criterios = [
                 'documento' => trim($_POST['documento'] ?? ''),
                 'fecha' => $_POST['fecha'] ?? '',
@@ -135,6 +153,8 @@ class VisitanteController {
             header('Location: index.php?pagina=lista');
             exit;
         }
+
+        $this->verificarCSRF('detalles');
         
         $id = (int)$_POST['id'];
         $hora_salida = trim($_POST['hora_salida']);
@@ -144,8 +164,15 @@ class VisitanteController {
             header('Location: index.php?pagina=detalles&id=' . $id);
             exit;
         }
+
+        $hora = DateTime::createFromFormat('H:i', $hora_salida);
+        if (!$hora) {
+            $_SESSION['errores'] = ['Formato de hora inválido'];
+            header('Location: index.php?pagina=detalles&id=' . $id);
+            exit;
+        }
         
-        $resultado = $this->visitanteModel->registrarSalida($id, $hora_salida);
+        $resultado = $this->visitanteModel->registrarSalida($id, $hora->format('H:i:s'));
         
         if ($resultado['exito']) {
             $_SESSION['mensaje_exito'] = 'Salida registrada. Tiempo de permanencia: ' . $resultado['tiempo_permanencia'];
@@ -178,6 +205,8 @@ class VisitanteController {
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->verificarCSRF('editar');
+
             $datos = [
                 'nombre_completo' => trim($_POST['nombre_completo']),
                 'documento_identidad' => trim($_POST['documento_identidad']),
@@ -189,14 +218,25 @@ class VisitanteController {
                 'motivo_visita' => trim($_POST['motivo_visita'] ?? ''),
                 'observaciones' => trim($_POST['observaciones'] ?? '')
             ];
+
+            $validacion = $this->validarRegistro($datos);
+            if (!$validacion['valido']) {
+                setOldInput($_POST);
+                $_SESSION['errores'] = $validacion['errores'];
+                header('Location: index.php?pagina=editar&id=' . $id);
+                exit;
+            }
             
             $resultado = $this->visitanteModel->actualizar($id, $datos);
             
             if ($resultado['exito']) {
+                clearOldInput();
                 $_SESSION['mensaje_exito'] = 'Visitante actualizado';
                 header('Location: index.php?pagina=detalles&id=' . $id);
             } else {
+                setOldInput($_POST);
                 $_SESSION['errores'] = [$resultado['mensaje']];
+                header('Location: index.php?pagina=editar&id=' . $id);
             }
             exit;
         }
@@ -209,31 +249,59 @@ class VisitanteController {
      */
     private function validarRegistro($datos) {
         $errores = [];
-        
+
         if (empty($datos['nombre_completo'])) {
             $errores[] = 'El nombre completo es requerido';
+        } elseif (mb_strlen($datos['nombre_completo']) > 100) {
+            $errores[] = 'El nombre completo no puede tener más de 100 caracteres';
         }
-        
+
         if (empty($datos['documento_identidad'])) {
             $errores[] = 'El documento de identidad es requerido';
+        } elseif (mb_strlen($datos['documento_identidad']) > 20) {
+            $errores[] = 'El documento de identidad no puede tener más de 20 caracteres';
         }
-        
+
         if (empty($datos['persona_visitada'])) {
             $errores[] = 'La persona visitada es requerida';
+        } elseif (mb_strlen($datos['persona_visitada']) > 100) {
+            $errores[] = 'La persona visitada no puede tener más de 100 caracteres';
         }
-        
-        if (empty($datos['despacho_visitado'])) {
+
+        if (empty($datos['despacho_visitado']) || !is_numeric($datos['despacho_visitado']) || $datos['despacho_visitado'] <= 0) {
             $errores[] = 'El despacho es requerido';
         }
-        
+
         if (empty($datos['fecha_visita'])) {
             $errores[] = 'La fecha es requerida';
+        } else {
+            $fecha = DateTime::createFromFormat('Y-m-d', $datos['fecha_visita']);
+            if (!$fecha || $fecha->format('Y-m-d') !== $datos['fecha_visita']) {
+                $errores[] = 'La fecha no tiene un formato válido';
+            }
         }
-        
+
         if (empty($datos['hora_entrada'])) {
             $errores[] = 'La hora de entrada es requerida';
+        } else {
+            $hora = DateTime::createFromFormat('H:i', $datos['hora_entrada']);
+            if (!$hora) {
+                $errores[] = 'La hora de entrada no tiene un formato válido';
+            }
         }
-        
+
+        if (!empty($datos['motivo_visita']) && mb_strlen($datos['motivo_visita']) > 255) {
+            $errores[] = 'El motivo de la visita no puede tener más de 255 caracteres';
+        }
+
+        if (!empty($datos['observaciones']) && mb_strlen($datos['observaciones']) > 255) {
+            $errores[] = 'Las observaciones no pueden tener más de 255 caracteres';
+        }
+
+        if (!empty($datos['tipo_documento']) && !in_array($datos['tipo_documento'], ['cedula', 'pasaporte', 'otro'], true)) {
+            $errores[] = 'El tipo de documento no es válido';
+        }
+
         return [
             'valido' => empty($errores),
             'errores' => $errores
