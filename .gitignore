@@ -1,0 +1,73 @@
+# ====================================================================
+# .gitignore - Sistema de Registro de Visitantes
+# Solo almacenar BACKEND en repositorio
+# ====================================================================
+
+# 🚫 FRONTEND - NO SUBIR
+# Vistas (interfaz HTML)
+app/views/
+!app/views/.gitkeep
+
+# Recursos estáticos (CSS, JS del cliente)
+public/css/
+public/js/
+!public/.gitkeep
+
+# 🚫 ARCHIVOS SENSIBLES
+# Configuración local
+config.php
+.env
+.env.local
+*.env
+
+# 🚫 TEMPORALES
+# Cache y logs
+*.log
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db
+
+# 🚫 DEPENDENCIAS
+node_modules/
+vendor/
+composer.lock
+
+# 🚫 IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+
+# 🚫 SISTEMA OPERATIVO
+.DS_Store
+.AppleDouble
+.LSOverride
+*.dll
+*.exe
+*.so
+*.dylib
+
+# 🚫 BASE DE DATOS (Backups)
+*.sql.bak
+*.sql.backup
+dump*.sql
+
+# 🚫 ARCHIVOS DE RESPALDO
+*.bak
+*.backup
+*~
+
+# ====================================================================
+# ✅ INCLUIR EN REPOSITORIO (Backend):
+# - config.example.php
+# - index.php
+# - app/models/*
+# - app/controllers/*
+# - database/schema.sql
+# - install.sh
+# - Documentación (.md)
+# ====================================================================
