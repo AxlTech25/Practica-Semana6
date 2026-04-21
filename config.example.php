@@ -41,8 +41,19 @@ define('CONTROLLERS_PATH', __DIR__ . '/app/controllers/');
 // CONFIGURACIÓN DE SESIÓN
 // ====================================================================
 
-// Iniciar sesión si no está iniciada
+// Forzar cookies de sesión seguras y evitar fijación de sesión.
+$secureCookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
 if (session_status() === PHP_SESSION_NONE) {
+    session_name('control_visitantes_session');
+    session_set_cookie_params([
+        'lifetime' => 0,
+        'path' => '/',
+        'domain' => $_SERVER['HTTP_HOST'] ?? '',
+        'secure' => $secureCookie,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
+    ini_set('session.use_strict_mode', 1);
     session_start();
 }
 

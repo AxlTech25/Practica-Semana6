@@ -27,20 +27,29 @@ class AutenticacionController {
             header('Location: index.php');
             exit;
         }
+
+        if (!verificarTokenCSRF($_POST['csrf_token'] ?? '')) {
+            $_SESSION['errores'] = ['Solicitud inválida. Por favor, intentelo de nuevo.'];
+            header('Location: index.php?pagina=login');
+            exit;
+        }
         
-        $correo = trim($_POST['correo'] ?? '');
+        $correo = filter_var(trim($_POST['correo'] ?? ''), FILTER_SANITIZE_EMAIL);
         $contraseña = trim($_POST['contraseña'] ?? '');
         
         // Validar campos
         $errores = [];
         if (empty($correo)) {
             $errores[] = 'El correo es requerido';
+        } elseif (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+            $errores[] = 'El correo no es válido';
         }
         if (empty($contraseña)) {
             $errores[] = 'La contraseña es requerida';
         }
         
         if (!empty($errores)) {
+            setOldInput($_POST);
             $_SESSION['errores'] = $errores;
             header('Location: index.php?pagina=login');
             exit;
@@ -48,6 +57,8 @@ class AutenticacionController {
         
         // Autenticar
         if ($this->usuarioModel->autenticar($correo, $contraseña)) {
+            session_regenerate_id(true);
+            clearOldInput();
             $_SESSION['usuario_id'] = $this->usuarioModel->id;
             $_SESSION['usuario_nombre'] = $this->usuarioModel->nombre;
             $_SESSION['usuario_rol'] = $this->usuarioModel->rol;
@@ -73,7 +84,15 @@ class AutenticacionController {
         if (isset($_SESSION['usuario_id'])) {
             $this->registrarLog('LOGOUT', 'usuarios', $_SESSION['usuario_id'], 'Logout exitoso');
         }
-        
+
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params['path'], $params['domain'],
+                $params['secure'], $params['httponly']
+            );
+        }
         session_destroy();
         header('Location: index.php?pagina=login');
         exit;

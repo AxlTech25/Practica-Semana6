@@ -46,6 +46,7 @@
         <h3>Registrar salida</h3>
         <?php if ($visitante['estado'] === 'activa'): ?>
             <form action="index.php?accion=registrarSalida" method="post">
+                <?php csrfInput(); ?>
                 <input type="hidden" name="id" value="<?= htmlspecialchars($visitante['id']) ?>">
                 <div class="form-group">
                     <label for="hora_salida">Hora de salida</label>

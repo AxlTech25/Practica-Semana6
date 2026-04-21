@@ -1,24 +1,25 @@
 <?php $page_title = 'Buscar visitas'; require_once VIEWS_PATH . 'partials/header.php'; ?>
 <div class="card">
     <form action="index.php?pagina=busqueda" method="post" class="grid grid-2">
+        <?php csrfInput(); ?>
         <div class="form-group">
             <label for="documento">Documento (DNI)</label>
-            <input type="text" id="documento" name="documento" value="<?= htmlspecialchars($_POST['documento'] ?? '') ?>" placeholder="12345678">
+            <input type="text" id="documento" name="documento" value="<?= old('documento') ?>" placeholder="12345678">
         </div>
         <div class="form-group">
             <label for="visitante">Nombre del visitante</label>
-            <input type="text" id="visitante" name="visitante" value="<?= htmlspecialchars($_POST['visitante'] ?? '') ?>" placeholder="Juan Pérez">
+            <input type="text" id="visitante" name="visitante" value="<?= old('visitante') ?>" placeholder="Juan Pérez">
         </div>
         <div class="form-group">
             <label for="fecha">Fecha</label>
-            <input type="date" id="fecha" name="fecha" value="<?= htmlspecialchars($_POST['fecha'] ?? '') ?>">
+            <input type="date" id="fecha" name="fecha" value="<?= old('fecha') ?>">
         </div>
         <div class="form-group">
             <label for="despacho">Despacho</label>
             <select id="despacho" name="despacho">
                 <option value="">Todos los despachos</option>
                 <?php foreach ($despachos as $despacho): ?>
-                    <option value="<?= htmlspecialchars($despacho['id']) ?>" <?= isset($_POST['despacho']) && $_POST['despacho'] == $despacho['id'] ? 'selected' : '' ?>><?= htmlspecialchars($despacho['nombre']) ?></option>
+                    <option value="<?= htmlspecialchars($despacho['id']) ?>" <?= old('despacho') == $despacho['id'] ? 'selected' : '' ?>><?= htmlspecialchars($despacho['nombre']) ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
