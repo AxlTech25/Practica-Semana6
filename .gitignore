@@ -5,8 +5,8 @@
 
 # 🚫 FRONTEND - NO SUBIR
 # Vistas (interfaz HTML)
-app/views/
-!app/views/.gitkeep
+# app/views/
+# !app/views/.gitkeep
 
 # Recursos estáticos (CSS, JS del cliente)
 public/css/
