@@ -41,9 +41,11 @@
                                     <span class="badge badge-danger"><?= htmlspecialchars($item['estado']) ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td>
-                                <a class="button button-secondary" href="index.php?pagina=detalles&id=<?= htmlspecialchars($item['id']) ?>">Detalles</a>
-                                <a class="button button-secondary" href="index.php?pagina=editar&id=<?= htmlspecialchars($item['id']) ?>">Editar</a>
+                            <td style="white-space: nowrap;">
+                                <div class="action-buttons">
+                                    <a class="button button-secondary btn-sm" href="index.php?pagina=detalles&id=<?= htmlspecialchars($item['id']) ?>">Detalles</a>
+                                    <a class="button button-secondary btn-sm" href="index.php?pagina=editar&id=<?= htmlspecialchars($item['id']) ?>">Editar</a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
