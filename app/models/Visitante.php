@@ -40,7 +40,7 @@ class Visitante {
         
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param(
-            "ssssiisssi",
+            "ssssissssi",
             $datos['nombre_completo'],
             $datos['documento_identidad'],
             $datos['tipo_documento'],
@@ -251,7 +251,7 @@ class Visitante {
         
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param(
-            "ssssiisssi",
+            "ssssissssi",
             $datos['nombre_completo'],
             $datos['documento_identidad'],
             $datos['tipo_documento'],

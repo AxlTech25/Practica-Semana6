@@ -4,6 +4,10 @@
 
 ## ✨ Características
 
+## Integrantes
+- Rojas Camayo Valentino
+- Estrada Flores Axel
+
 ### 📝 Registro de Visitantes
 - Captura de datos completos: nombre, documento, despacho
 - Control automático de entrada/salida

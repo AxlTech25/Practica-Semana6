@@ -50,6 +50,28 @@ if ($accion === 'logout') {
 }
 
 // ====================================================================
+// ACCIONES DE VISITANTES (POST)
+// ====================================================================
+
+if ($accion === 'procesarRegistro') {
+    require_once CONTROLLERS_PATH . 'AutenticacionController.php';
+    AutenticacionController::verificarSesion();
+    require_once CONTROLLERS_PATH . 'VisitanteController.php';
+    $visitanteController = new VisitanteController($conn);
+    $visitanteController->procesarRegistro();
+    exit;
+}
+
+if ($accion === 'registrarSalida') {
+    require_once CONTROLLERS_PATH . 'AutenticacionController.php';
+    AutenticacionController::verificarSesion();
+    require_once CONTROLLERS_PATH . 'VisitanteController.php';
+    $visitanteController = new VisitanteController($conn);
+    $visitanteController->registrarSalida();
+    exit;
+}
+
+// ====================================================================
 // ENRUTADOR PRINCIPAL
 // ====================================================================
 
@@ -109,21 +131,6 @@ switch ($pagina) {
         $visitanteController->mostrarEdicion();
         break;
     
-    // ---- ACCIONES DE VISITANTES ----
-    case 'procesarRegistro':
-    case 'registrarSalida':
-        if ($accion) {
-            require_once CONTROLLERS_PATH . 'AutenticacionController.php';
-            AutenticacionController::verificarSesion();
-            require_once CONTROLLERS_PATH . 'VisitanteController.php';
-            $visitanteController = new VisitanteController($conn);
-            
-            if ($_POST['accion'] === 'registrarSalida') {
-                $visitanteController->registrarSalida();
-            }
-        }
-        break;
-    
     // ---- PÁGINAS DE REPORTES ----
     case 'reportes':
         require_once CONTROLLERS_PATH . 'AutenticacionController.php';
@@ -162,30 +169,10 @@ switch ($pagina) {
         $reporteController->exportarExcel();
         exit;
     
-    // ---- MANEJO DE ACCIONES (POST) ----
+    // ---- PÁGINA NO ENCONTRADA ----
     default:
-        // Si llega una acción POST, procesarla
-        if ($accion === 'procesarRegistro') {
-            require_once CONTROLLERS_PATH . 'AutenticacionController.php';
-            AutenticacionController::verificarSesion();
-            require_once CONTROLLERS_PATH . 'VisitanteController.php';
-            $visitanteController = new VisitanteController($conn);
-            $visitanteController->procesarRegistro();
-            exit;
-        }
-        elseif ($accion === 'registrarSalida') {
-            require_once CONTROLLERS_PATH . 'AutenticacionController.php';
-            AutenticacionController::verificarSesion();
-            require_once CONTROLLERS_PATH . 'VisitanteController.php';
-            $visitanteController = new VisitanteController($conn);
-            $visitanteController->registrarSalida();
-            exit;
-        }
-        else {
-            // Si no encuentra la página, redirigir al dashboard
-            header('Location: index.php?pagina=dashboard');
-            exit;
-        }
+        header('Location: index.php?pagina=dashboard');
+        exit;
 }
 
 // Cerrar conexión (opcional, se cerrará automáticamente al terminar)

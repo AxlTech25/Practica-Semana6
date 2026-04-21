@@ -36,7 +36,8 @@ class ReporteController {
         $fecha_fin = $_GET['fecha_fin'] ?? date('Y-m-d');
         
         require_once MODELS_PATH . 'Despacho.php';
-        $despachoModel = new Despacho(global $conn);
+        global $conn;
+        $despachoModel = new Despacho($conn);
         $despachos = $despachoModel->obtenerTodos();
         
         $despacho_filtro = $_GET['despacho'] ?? '';
